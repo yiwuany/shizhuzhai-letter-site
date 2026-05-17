@@ -1,5 +1,14 @@
 # Change Log
 
+## V2.2 Final - 2026-05-17
+
+- Finalized the V2 paper-axis behavior for long letters.
+- Expanded vertical long text horizontally instead of downward, while keeping workbench overflow inside the preview column.
+- Centered vertical immersive editing so expanded stationery opens from the middle and can scroll both directions.
+- Retiled vertical expanded stationery as a horizontal spread so the background image remains continuous.
+- Made grid cells distribute evenly across the actual writing area and kept line-height aligned to the grid.
+- Widened horizontal writing proportions so horizontal letters no longer read as a narrow vertical sheet.
+
 ## V2.1 - 2026-05-17
 
 - Reworked vertical stationery guides into a traditional letter-paper frame: one outer writing-area border with vertical column separators.

@@ -177,6 +177,7 @@
   const els = {};
   let state = normalizeState(loadState());
   let fitFrame = 0;
+  let fitTimer = 0;
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -435,18 +436,20 @@
           </div>
         </div>
         <div class="paper-stage">
-          <div class="paper-frame" id="paperFrame">
-            <img class="paper-image-probe" id="paperImage" alt="">
-            <div class="paper-wash"></div>
-            <div class="letter-zone" id="letterZone">
-              <div class="paper-grid" id="paperGrid" aria-hidden="true"></div>
-              <div class="paper-editor" id="paperEditor">
-                <div class="editable-title" id="editTitle" data-edit-field="title" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("titlePlaceholder"))}"></div>
-                <div class="editable-body" id="editBody" data-edit-field="body" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("bodyPlaceholder"))}"></div>
-                <div class="editable-signature" id="editSignature" data-edit-field="signature" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("signaturePlaceholder"))}"></div>
+          <div class="paper-positioner" id="paperPositioner">
+            <div class="paper-frame" id="paperFrame">
+              <img class="paper-image-probe" id="paperImage" alt="">
+              <div class="paper-wash"></div>
+              <div class="letter-zone" id="letterZone">
+                <div class="paper-grid" id="paperGrid" aria-hidden="true"></div>
+                <div class="paper-editor" id="paperEditor">
+                  <div class="editable-title" id="editTitle" data-edit-field="title" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("titlePlaceholder"))}"></div>
+                  <div class="editable-body" id="editBody" data-edit-field="body" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("bodyPlaceholder"))}"></div>
+                  <div class="editable-signature" id="editSignature" data-edit-field="signature" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("signaturePlaceholder"))}"></div>
+                </div>
               </div>
+              <div class="seal-mark" id="sealMark"></div>
             </div>
-            <div class="seal-mark" id="sealMark"></div>
           </div>
         </div>
         <p class="immersive-hint">${t("immersiveHint")}</p>
@@ -454,6 +457,8 @@
     `;
 
     els.paperFrame = document.getElementById("paperFrame");
+    els.paperPositioner = document.getElementById("paperPositioner");
+    els.paperStage = document.querySelector(".paper-stage");
     els.paperImage = document.getElementById("paperImage");
     els.letterZone = document.getElementById("letterZone");
     els.paperEditor = document.getElementById("paperEditor");
@@ -556,12 +561,23 @@
 
     const font = FONT_OPTIONS.find((item) => item.value === state.style.fontFamily) || FONT_OPTIONS[0];
     const imageUrl = `url("${asset.previewPath.replace(/"/g, "%22")}")`;
-    const row = Math.max(18, state.style.fontSize * state.style.lineHeight);
-    const col = Math.max(22, state.style.fontSize * state.style.lineHeight);
+    const targetRow = Math.max(18, state.style.fontSize * state.style.lineHeight);
+    const targetCol = Math.max(22, state.style.fontSize * state.style.lineHeight);
+    const sourceRatio = asset.width / asset.height;
+    const displayRatio = paperDisplayRatio(asset);
 
     document.body.classList.toggle("is-immersive", state.mode === "immersive");
     els.paperFrame.style.setProperty("--paper-ratio", `${asset.width} / ${asset.height}`);
-    els.paperFrame.style.setProperty("--paper-ratio-num", asset.width / asset.height);
+    els.paperFrame.style.setProperty("--paper-ratio-num", sourceRatio);
+    els.paperFrame.style.setProperty("--paper-display-ratio-num", displayRatio);
+    els.paperFrame.style.setProperty("--paper-base-max", state.writingMode === "horizontal" ? "700px" : "580px");
+    els.paperFrame.style.setProperty("--paper-immersive-max", state.writingMode === "horizontal" ? "760px" : "620px");
+    if (els.paperPositioner) {
+      els.paperPositioner.style.setProperty("--paper-ratio-num", sourceRatio);
+      els.paperPositioner.style.setProperty("--paper-display-ratio-num", displayRatio);
+      els.paperPositioner.style.setProperty("--paper-base-max", state.writingMode === "horizontal" ? "700px" : "580px");
+      els.paperPositioner.style.setProperty("--paper-immersive-max", state.writingMode === "horizontal" ? "760px" : "620px");
+    }
     els.paperFrame.style.setProperty("--paper-url", imageUrl);
     els.paperFrame.style.setProperty("--paper-brightness", state.style.paperBrightness / 100);
     els.paperFrame.style.setProperty("--paper-contrast", state.style.paperContrast / 100);
@@ -574,8 +590,8 @@
     els.paperFrame.style.setProperty("--letter-spacing", `${state.style.letterSpacing}em`);
     els.paperFrame.style.setProperty("--letter-opacity", state.style.inkOpacity / 100);
     els.paperFrame.style.setProperty("--grid-opacity", state.style.gridOpacity / 100);
-    els.paperFrame.style.setProperty("--grid-row", `${row}px`);
-    els.paperFrame.style.setProperty("--grid-col", `${col}px`);
+    els.paperFrame.style.setProperty("--grid-row", `${targetRow}px`);
+    els.paperFrame.style.setProperty("--grid-col", `${targetCol}px`);
 
     els.paperFrame.dataset.writingMode = state.writingMode;
     els.paperImage.src = asset.previewPath;
@@ -591,40 +607,128 @@
     els.sealMark.style.display = state.style.showSeal ? "grid" : "none";
 
     updateControlReadouts();
+    fitPaperToContent();
     requestFitPaper();
   }
 
   function requestFitPaper() {
     window.cancelAnimationFrame(fitFrame);
+    window.clearTimeout(fitTimer);
     fitFrame = window.requestAnimationFrame(fitPaperToContent);
+    fitTimer = window.setTimeout(fitPaperToContent, 40);
   }
 
   function fitPaperToContent() {
-    if (!els.paperFrame || !els.letterZone) return;
+    if (!els.paperFrame || !els.paperPositioner || !els.paperStage || !els.letterZone) return;
 
     const asset = selectedAsset();
     if (!asset) return;
 
+    els.paperFrame.classList.remove("is-expanded-left", "is-vertical-spread", "is-centered-spread");
+    els.paperStage.classList.remove("is-expanded-left", "is-expanded-down", "is-centered-spread");
+    els.paperPositioner.classList.remove("is-expanded-left", "is-expanded-down", "is-centered-spread");
+    els.paperPositioner.style.width = "";
+    els.paperFrame.style.minWidth = "";
     els.paperFrame.style.minHeight = "";
-    const width = els.paperFrame.getBoundingClientRect().width;
-    const baseHeight = width * asset.height / asset.width;
+    const baseWidth = els.paperPositioner.getBoundingClientRect().width || els.paperFrame.getBoundingClientRect().width;
+    const baseHeight = baseWidth / paperDisplayRatio(asset);
+    let width = baseWidth;
     let height = baseHeight;
-    els.paperFrame.style.minHeight = `${height}px`;
+    applyPaperGeometry(width, height, baseWidth, baseHeight);
+    updateGridDistribution();
 
     for (let i = 0; i < 18; i++) {
-      const zoneRect = els.letterZone.getBoundingClientRect();
-      const frameRect = els.paperFrame.getBoundingClientRect();
-      const allowedOverflow = state.writingMode === "vertical"
-        ? Math.max(32, zoneRect.left - frameRect.left - 12)
-        : 2;
       const overflow = state.writingMode === "vertical"
         ? els.letterZone.scrollWidth - els.letterZone.clientWidth
         : els.letterZone.scrollHeight - els.letterZone.clientHeight;
+      const allowedOverflow = 2;
 
       if (overflow <= allowedOverflow) break;
-      height += Math.min(520, Math.max(120, overflow * 1.45));
-      els.paperFrame.style.minHeight = `${height}px`;
+      if (state.writingMode === "vertical") {
+        width += Math.min(620, Math.max(120, overflow * 1.45));
+      } else {
+        height += Math.min(620, Math.max(120, overflow * 1.45));
+      }
+      applyPaperGeometry(width, height, baseWidth, baseHeight);
+      updateGridDistribution();
     }
+
+    updateGridDistribution();
+    updateStageScroll(width > baseWidth + 1, height > baseHeight + 1);
+  }
+
+  function applyPaperGeometry(width, height, baseWidth, baseHeight) {
+    const top = baseHeight * 0.058;
+    const right = baseWidth * 0.058;
+    const bottom = baseHeight * 0.068;
+    const left = baseWidth * 0.058;
+
+    els.paperFrame.style.minWidth = `${width}px`;
+    els.paperFrame.style.minHeight = `${height}px`;
+    els.paperPositioner.style.width = `${width}px`;
+    els.paperFrame.style.setProperty("--paper-page-width", `${baseWidth}px`);
+    els.paperFrame.style.setProperty("--paper-page-height", `${baseHeight}px`);
+    els.paperFrame.style.setProperty("--writing-top-size", `${top}px`);
+    els.paperFrame.style.setProperty("--writing-right-size", `${right}px`);
+    els.paperFrame.style.setProperty("--writing-bottom-size", `${bottom}px`);
+    els.paperFrame.style.setProperty("--writing-left-size", `${left}px`);
+    const expandedLeft = state.writingMode === "vertical" && width > baseWidth + 1;
+    const expandedDown = state.writingMode === "horizontal" && height > baseHeight + 1;
+    const centeredSpread = expandedLeft && state.mode === "immersive";
+    els.paperFrame.classList.toggle("is-expanded-left", expandedLeft);
+    els.paperFrame.classList.toggle("is-vertical-spread", expandedLeft);
+    els.paperFrame.classList.toggle("is-centered-spread", centeredSpread);
+    els.paperStage.classList.toggle("is-expanded-left", expandedLeft);
+    els.paperStage.classList.toggle("is-expanded-down", expandedDown);
+    els.paperStage.classList.toggle("is-centered-spread", centeredSpread);
+    els.paperPositioner.classList.toggle("is-expanded-left", expandedLeft);
+    els.paperPositioner.classList.toggle("is-expanded-down", expandedDown);
+    els.paperPositioner.classList.toggle("is-centered-spread", centeredSpread);
+  }
+
+  function updateStageScroll(expandedLeft, expandedDown) {
+    if (!els.paperStage) return;
+
+    if (expandedLeft) {
+      const maxScroll = Math.max(0, els.paperStage.scrollWidth - els.paperStage.clientWidth);
+      els.paperStage.scrollLeft = state.mode === "immersive" ? maxScroll / 2 : maxScroll;
+      return;
+    }
+
+    els.paperStage.scrollLeft = 0;
+    if (!expandedDown) els.paperStage.scrollTop = 0;
+  }
+
+  function paperDisplayRatio(asset) {
+    const sourceRatio = asset.width / asset.height;
+    return state.writingMode === "horizontal"
+      ? Math.max(sourceRatio, 0.78)
+      : sourceRatio;
+  }
+
+  function updateGridDistribution() {
+    if (!els.paperFrame || !els.letterZone) return;
+
+    const zoneRect = els.letterZone.getBoundingClientRect();
+    if (!zoneRect.width || !zoneRect.height) return;
+
+    const computedStyle = window.getComputedStyle(els.letterZone);
+    const computedFontSize = Number.parseFloat(computedStyle.fontSize) || state.style.fontSize;
+    const targetRow = Math.max(18, computedFontSize * state.style.lineHeight);
+    const targetCol = Math.max(22, computedFontSize * state.style.lineHeight);
+    const columns = Math.max(1, Math.round(zoneRect.width / targetCol));
+    const rows = Math.max(1, Math.round(zoneRect.height / targetRow));
+    const columnWidth = zoneRect.width / columns;
+    const rowHeight = zoneRect.height / rows;
+    const alignedLineHeight = state.writingMode === "vertical"
+      ? columnWidth / computedFontSize
+      : rowHeight / computedFontSize;
+
+    els.paperFrame.style.setProperty("--grid-columns", columns);
+    els.paperFrame.style.setProperty("--grid-rows", rows);
+    els.paperFrame.style.setProperty("--grid-col", `${columnWidth}px`);
+    els.paperFrame.style.setProperty("--grid-row", `${rowHeight}px`);
+    els.paperFrame.style.setProperty("--letter-line-height", alignedLineHeight);
   }
 
   function syncEditableFields(singleField) {
