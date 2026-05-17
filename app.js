@@ -2,7 +2,8 @@
   "use strict";
 
   const ASSETS = Array.isArray(window.SHIZHUZHAI_ASSETS) ? window.SHIZHUZHAI_ASSETS : [];
-  const STORAGE_KEY = "shizhuzhai-letter-v1";
+  const STORAGE_KEY = "shizhuzhai-letter-v2";
+  const LEGACY_STORAGE_KEY = "shizhuzhai-letter-v1";
 
   const FONT_OPTIONS = [
     {
@@ -35,14 +36,15 @@
   const DEFAULT_STYLE = {
     fontFamily: "song",
     fontSize: 22,
-    lineHeight: 1.7,
+    lineHeight: 1.72,
     letterSpacing: 0.06,
     inkColor: "#3f3931",
-    inkOpacity: 94,
+    inkOpacity: 95,
     paperBrightness: 100,
     paperContrast: 100,
     paperSaturation: 96,
-    maskOpacity: 18,
+    maskOpacity: 12,
+    gridOpacity: 34,
     showTitle: true,
     showSignature: true,
     showSeal: true,
@@ -53,6 +55,8 @@
     language: "zh-Hant",
     category: "all",
     selectedId: "",
+    writingMode: "vertical",
+    mode: "setup",
     title: "山中寄友",
     body: "展信安。\n\n窗前新雨初歇，紙上尚有竹齋舊色。想起前日同看花影，便覺山水也有回音。\n\n此箋不為長篇，只願把一點清明寄到你案前。",
     signature: "某年春日",
@@ -62,26 +66,27 @@
   const I18N = {
     "zh-Hant": {
       brand: "十竹齋箋譜寫信",
-      tagline: "選箋、落字、成信",
-      workbench: "工作臺",
-      immersive: "沉浸",
-      classic: "素箋",
+      tagline: "選箋、設格、入紙書寫",
       switchLang: "简体",
+      enterImmersive: "進入沉浸編輯",
+      exitImmersive: "返回設定",
       library: "箋紙",
       allCategories: "全部",
       totalCount: "張箋紙",
       randomAll: "全庫隨機",
       randomCategory: "本類隨機",
       currentPaper: "當前箋紙",
-      editor: "書寫",
+      editor: "設定",
       titleLabel: "題名",
       bodyLabel: "正文",
       signatureLabel: "落款",
-      titlePlaceholder: "給這封信一個題名",
-      bodyPlaceholder: "在這裡寫信",
-      signaturePlaceholder: "姓名、日期或一句落款",
-      emptyPreview: "未有正文",
-      style: "樣式",
+      titlePlaceholder: "題名",
+      bodyPlaceholder: "在箋紙上直接書寫",
+      signaturePlaceholder: "落款",
+      direction: "排版方向",
+      vertical: "直排",
+      horizontal: "橫排",
+      style: "字與界格",
       fontFamily: "字體",
       fontSong: "宋體",
       fontKai: "楷體",
@@ -96,7 +101,8 @@
       paperBrightness: "箋紙亮度",
       paperContrast: "箋紙對比",
       paperSaturation: "箋紙飽和",
-      maskOpacity: "遮罩透明",
+      maskOpacity: "紙面柔化",
+      gridOpacity: "界格濃淡",
       showTitle: "顯示題名",
       showSignature: "顯示落款",
       showSeal: "顯示印章",
@@ -107,33 +113,34 @@
       confirmResetContent: "清空題名、正文和落款？",
       confirmResetAll: "清除本機保存並回到預設狀態？",
       noAssets: "尚未生成素材清單。請先執行 tools/build-assets.ps1。",
-      categoryAllMeta: "全部分類",
       paperMeta: "分類",
+      immersiveHint: "可直接在箋紙上書寫，按 Esc 返回設定",
       px: "px",
       percent: "%"
     },
     "zh-Hans": {
       brand: "十竹斋笺谱写信",
-      tagline: "选笺、落字、成信",
-      workbench: "工作台",
-      immersive: "沉浸",
-      classic: "素笺",
+      tagline: "选笺、设格、入纸书写",
       switchLang: "繁體",
+      enterImmersive: "进入沉浸编辑",
+      exitImmersive: "返回设置",
       library: "笺纸",
       allCategories: "全部",
       totalCount: "张笺纸",
       randomAll: "全库随机",
       randomCategory: "本类随机",
       currentPaper: "当前笺纸",
-      editor: "书写",
+      editor: "设置",
       titleLabel: "题名",
       bodyLabel: "正文",
       signatureLabel: "落款",
-      titlePlaceholder: "给这封信一个题名",
-      bodyPlaceholder: "在这里写信",
-      signaturePlaceholder: "姓名、日期或一句落款",
-      emptyPreview: "未有正文",
-      style: "样式",
+      titlePlaceholder: "题名",
+      bodyPlaceholder: "在笺纸上直接书写",
+      signaturePlaceholder: "落款",
+      direction: "排版方向",
+      vertical: "直排",
+      horizontal: "横排",
+      style: "字与界格",
       fontFamily: "字体",
       fontSong: "宋体",
       fontKai: "楷体",
@@ -148,7 +155,8 @@
       paperBrightness: "笺纸亮度",
       paperContrast: "笺纸对比",
       paperSaturation: "笺纸饱和",
-      maskOpacity: "遮罩透明",
+      maskOpacity: "纸面柔化",
+      gridOpacity: "界格浓淡",
       showTitle: "显示题名",
       showSignature: "显示落款",
       showSeal: "显示印章",
@@ -159,8 +167,8 @@
       confirmResetContent: "清空题名、正文和落款？",
       confirmResetAll: "清除本机保存并回到默认状态？",
       noAssets: "尚未生成素材清单。请先执行 tools/build-assets.ps1。",
-      categoryAllMeta: "全部分类",
       paperMeta: "分类",
+      immersiveHint: "可直接在笺纸上书写，按 Esc 返回设置",
       px: "px",
       percent: "%"
     }
@@ -168,6 +176,7 @@
 
   const els = {};
   let state = normalizeState(loadState());
+  let fitFrame = 0;
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -183,99 +192,154 @@
     ensureSelectedAsset();
     renderAll();
     bindEvents();
-    updatePreview();
+    updatePaper();
     saveState();
   }
 
   function bindEvents() {
-    els.root.addEventListener("click", function (event) {
-      const target = event.target.closest("[data-action]");
-      if (!target) return;
-      const action = target.dataset.action;
+    els.root.addEventListener("click", handleClick);
+    els.root.addEventListener("input", handleInput);
+    els.root.addEventListener("change", handleInput);
+    window.addEventListener("resize", requestFitPaper);
 
-      if (action === "toggle-language") {
-        state.language = state.language === "zh-Hant" ? "zh-Hans" : "zh-Hant";
-        renderAll();
-        updatePreview();
-        saveState();
-      }
-
-      if (action === "select-category") {
-        state.category = target.dataset.category || "all";
-        selectFirstInCurrentCategory();
-        renderLibrary();
-        updatePreview();
-        saveState();
-      }
-
-      if (action === "select-asset") {
-        state.selectedId = target.dataset.assetId || state.selectedId;
-        renderLibrary();
-        updatePreview();
-        saveState();
-      }
-
-      if (action === "random-all") {
-        const asset = randomFrom(ASSETS);
-        if (asset) {
-          state.selectedId = asset.id;
-          state.category = "all";
-          renderLibrary();
-          updatePreview();
-          saveState();
-        }
-      }
-
-      if (action === "random-category") {
-        const list = filteredAssets();
-        const asset = randomFrom(list.length ? list : ASSETS);
-        if (asset) {
-          state.selectedId = asset.id;
-          if (state.category === "all") state.category = asset.category;
-          renderLibrary();
-          updatePreview();
-          saveState();
-        }
-      }
-
-      if (action === "reset-style") {
-        state.style = { ...DEFAULT_STYLE };
-        renderEditor();
-        updatePreview();
-        saveState();
-      }
-
-      if (action === "reset-content" && window.confirm(t("confirmResetContent"))) {
-        state.title = "";
-        state.body = "";
-        state.signature = "";
-        renderEditor();
-        updatePreview();
-        saveState();
-      }
-
-      if (action === "reset-all" && window.confirm(t("confirmResetAll"))) {
-        localStorage.removeItem(STORAGE_KEY);
-        state = normalizeState({ ...DEFAULT_STATE, style: { ...DEFAULT_STYLE } });
-        ensureSelectedAsset();
-        renderAll();
-        updatePreview();
-        saveState();
-      }
+    els.root.addEventListener("paste", function (event) {
+      const editable = event.target.closest("[data-edit-field]");
+      if (!editable) return;
+      event.preventDefault();
+      const text = (event.clipboardData || window.clipboardData).getData("text/plain");
+      document.execCommand("insertText", false, text);
     });
 
-    els.root.addEventListener("input", handleEditableInput);
-    els.root.addEventListener("change", handleEditableInput);
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && state.mode === "immersive") {
+        exitImmersive();
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        enterImmersive();
+      }
+    });
   }
 
-  function handleEditableInput(event) {
+  function handleClick(event) {
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
+
+    const action = target.dataset.action;
+
+    if (action === "toggle-language") {
+      state.language = state.language === "zh-Hant" ? "zh-Hans" : "zh-Hant";
+      renderAll();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "enter-immersive") {
+      enterImmersive();
+      return;
+    }
+
+    if (action === "exit-immersive") {
+      exitImmersive();
+      return;
+    }
+
+    if (action === "select-category") {
+      state.category = target.dataset.category || "all";
+      selectFirstInCurrentCategory();
+      renderLibrary();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "select-asset") {
+      state.selectedId = target.dataset.assetId || state.selectedId;
+      renderLibrary();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "random-all") {
+      const asset = randomFrom(ASSETS);
+      if (asset) {
+        state.selectedId = asset.id;
+        state.category = "all";
+        renderLibrary();
+        updatePaper();
+        saveState();
+      }
+      return;
+    }
+
+    if (action === "random-category") {
+      const list = filteredAssets();
+      const asset = randomFrom(list.length ? list : ASSETS);
+      if (asset) {
+        state.selectedId = asset.id;
+        if (state.category === "all") state.category = asset.category;
+        renderLibrary();
+        updatePaper();
+        saveState();
+      }
+      return;
+    }
+
+    if (action === "writing-mode") {
+      state.writingMode = target.dataset.mode === "horizontal" ? "horizontal" : "vertical";
+      renderEditor();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "reset-style") {
+      state.style = { ...DEFAULT_STYLE };
+      renderEditor();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "reset-content" && window.confirm(t("confirmResetContent"))) {
+      state.title = "";
+      state.body = "";
+      state.signature = "";
+      syncTextControls();
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (action === "reset-all" && window.confirm(t("confirmResetAll"))) {
+      localStorage.removeItem(STORAGE_KEY);
+      state = normalizeState({});
+      ensureSelectedAsset();
+      renderAll();
+      updatePaper();
+      saveState();
+    }
+  }
+
+  function handleInput(event) {
     const el = event.target;
     const field = el.dataset.field;
+    const editField = el.dataset.editField;
     const styleKey = el.dataset.style;
 
     if (field) {
       state[field] = el.value;
-      updatePreview();
+      syncEditableFields(field);
+      updatePaper();
+      saveState();
+      return;
+    }
+
+    if (editField) {
+      state[editField] = normalizeEditableText(el.innerText, editField);
+      syncTextControls(editField);
+      requestFitPaper();
       saveState();
       return;
     }
@@ -288,7 +352,7 @@
       } else {
         state.style[styleKey] = el.value;
       }
-      updatePreview();
+      updatePaper();
       updateControlReadouts();
       saveState();
     }
@@ -296,6 +360,7 @@
 
   function renderAll() {
     document.documentElement.lang = state.language;
+    document.body.classList.toggle("is-immersive", state.mode === "immersive");
     renderTopbar();
     renderLibrary();
     renderPreviewShell();
@@ -303,25 +368,14 @@
   }
 
   function renderTopbar() {
-    const layout = document.body.dataset.layout || "workbench";
-    const nav = [
-      ["workbench", "layout-a-workbench.html"],
-      ["immersive", "layout-b-immersive.html"],
-      ["classic", "layout-c-classic.html"]
-    ];
-
     els.topbar.innerHTML = `
       <div class="brand">
         <h1 class="brand-title">${t("brand")}</h1>
         <p class="brand-subtitle">${t("tagline")}</p>
       </div>
-      <nav class="layout-nav" aria-label="Layout">
-        ${nav.map(([key, href]) => `
-          <a class="nav-link ${layout === key ? "is-active" : ""}" href="${href}">${t(key)}</a>
-        `).join("")}
-      </nav>
       <div class="top-actions">
         <button class="btn" type="button" data-action="toggle-language">${t("switchLang")}</button>
+        <button class="btn primary" type="button" data-action="enter-immersive">${t("enterImmersive")}</button>
       </div>
     `;
   }
@@ -377,31 +431,35 @@
           </div>
           <div class="button-row">
             <button class="btn" type="button" data-action="random-category">${t("randomCategory")}</button>
-            <button class="btn primary" type="button" data-action="random-all">${t("randomAll")}</button>
+            <button class="btn primary" type="button" data-action="enter-immersive">${t("enterImmersive")}</button>
           </div>
         </div>
         <div class="paper-stage">
           <div class="paper-frame" id="paperFrame">
-            <img class="paper-image" id="paperImage" alt="">
-            <div class="paper-mask" id="paperMask"></div>
-            <div class="letter-writing-area" id="letterWritingArea">
-              <div class="preview-letter-title" id="previewTitle"></div>
-              <div class="preview-letter-body" id="previewBody"></div>
-              <div class="preview-letter-signature" id="previewSignature"></div>
+            <img class="paper-image-probe" id="paperImage" alt="">
+            <div class="paper-wash"></div>
+            <div class="letter-zone" id="letterZone">
+              <div class="paper-grid" id="paperGrid" aria-hidden="true"></div>
+              <div class="paper-editor" id="paperEditor">
+                <div class="editable-title" id="editTitle" data-edit-field="title" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("titlePlaceholder"))}"></div>
+                <div class="editable-body" id="editBody" data-edit-field="body" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("bodyPlaceholder"))}"></div>
+                <div class="editable-signature" id="editSignature" data-edit-field="signature" contenteditable="plaintext-only" spellcheck="false" data-placeholder="${escapeAttr(t("signaturePlaceholder"))}"></div>
+              </div>
             </div>
             <div class="seal-mark" id="sealMark"></div>
           </div>
         </div>
+        <p class="immersive-hint">${t("immersiveHint")}</p>
       </div>
     `;
 
     els.paperFrame = document.getElementById("paperFrame");
     els.paperImage = document.getElementById("paperImage");
-    els.paperMask = document.getElementById("paperMask");
-    els.writingArea = document.getElementById("letterWritingArea");
-    els.previewTitle = document.getElementById("previewTitle");
-    els.previewBody = document.getElementById("previewBody");
-    els.previewSignature = document.getElementById("previewSignature");
+    els.letterZone = document.getElementById("letterZone");
+    els.paperEditor = document.getElementById("paperEditor");
+    els.editTitle = document.getElementById("editTitle");
+    els.editBody = document.getElementById("editBody");
+    els.editSignature = document.getElementById("editSignature");
     els.sealMark = document.getElementById("sealMark");
     els.assetMeta = document.getElementById("assetMeta");
   }
@@ -411,19 +469,24 @@
       <div class="panel-head">
         <h2 class="panel-title">${t("editor")}</h2>
       </div>
+      <div class="segmented" role="group" aria-label="${escapeAttr(t("direction"))}">
+        <button class="segment ${state.writingMode === "vertical" ? "is-active" : ""}" type="button" data-action="writing-mode" data-mode="vertical">${t("vertical")}</button>
+        <button class="segment ${state.writingMode === "horizontal" ? "is-active" : ""}" type="button" data-action="writing-mode" data-mode="horizontal">${t("horizontal")}</button>
+      </div>
       <div class="field-group">
         <label class="field-label" for="letterTitle">${t("titleLabel")}</label>
-        <input class="input" id="letterTitle" data-field="title" value="${escapeAttr(state.title)}" placeholder="${t("titlePlaceholder")}">
+        <input class="input" id="letterTitle" data-field="title" value="${escapeAttr(state.title)}" placeholder="${escapeAttr(t("titlePlaceholder"))}">
       </div>
       <div class="field-group">
         <label class="field-label" for="letterBody">${t("bodyLabel")}</label>
-        <textarea class="textarea" id="letterBody" data-field="body" placeholder="${t("bodyPlaceholder")}">${escapeHtml(state.body)}</textarea>
+        <textarea class="textarea" id="letterBody" data-field="body" placeholder="${escapeAttr(t("bodyPlaceholder"))}">${escapeHtml(state.body)}</textarea>
       </div>
       <div class="field-group">
         <label class="field-label" for="letterSignature">${t("signatureLabel")}</label>
-        <textarea class="textarea compact" id="letterSignature" data-field="signature" placeholder="${t("signaturePlaceholder")}">${escapeHtml(state.signature)}</textarea>
+        <textarea class="textarea compact" id="letterSignature" data-field="signature" placeholder="${escapeAttr(t("signaturePlaceholder"))}">${escapeHtml(state.signature)}</textarea>
       </div>
       <div class="button-row">
+        <button class="btn primary" type="button" data-action="enter-immersive">${t("enterImmersive")}</button>
         <button class="btn danger" type="button" data-action="reset-content">${t("resetContent")}</button>
       </div>
       <div class="section-divider"></div>
@@ -437,7 +500,7 @@
         </select>
       </div>
       ${rangeControl("fontSize", 16, 34, 1, t("px"))}
-      ${rangeControl("lineHeight", 1.1, 2.4, .05, "")}
+      ${rangeControl("lineHeight", 1.15, 2.3, .01, "")}
       ${rangeControl("letterSpacing", 0, .24, .01, "em")}
       <div class="color-row">
         <label class="control-label" for="inkColor">${t("inkColor")}</label>
@@ -448,7 +511,8 @@
       ${rangeControl("paperBrightness", 82, 118, 1, t("percent"))}
       ${rangeControl("paperContrast", 82, 122, 1, t("percent"))}
       ${rangeControl("paperSaturation", 62, 130, 1, t("percent"))}
-      ${rangeControl("maskOpacity", 0, 56, 1, t("percent"))}
+      ${rangeControl("maskOpacity", 0, 42, 1, t("percent"))}
+      ${rangeControl("gridOpacity", 0, 70, 1, t("percent"))}
       <div class="check-grid">
         ${checkControl("showTitle")}
         ${checkControl("showSignature")}
@@ -486,15 +550,18 @@
     `;
   }
 
-  function updatePreview() {
+  function updatePaper() {
     const asset = selectedAsset();
     if (!asset || !els.paperFrame) return;
 
     const font = FONT_OPTIONS.find((item) => item.value === state.style.fontFamily) || FONT_OPTIONS[0];
-    const ratio = `${asset.width} / ${asset.height}`;
-    const emptyBody = !state.body.trim();
+    const imageUrl = `url("${asset.previewPath.replace(/"/g, "%22")}")`;
+    const row = Math.max(18, state.style.fontSize * state.style.lineHeight);
+    const col = Math.max(18, state.style.fontSize * (1 + state.style.letterSpacing * 2.2));
 
-    els.paperFrame.style.setProperty("--paper-ratio", ratio);
+    document.body.classList.toggle("is-immersive", state.mode === "immersive");
+    els.paperFrame.style.setProperty("--paper-ratio", `${asset.width} / ${asset.height}`);
+    els.paperFrame.style.setProperty("--paper-url", imageUrl);
     els.paperFrame.style.setProperty("--paper-brightness", state.style.paperBrightness / 100);
     els.paperFrame.style.setProperty("--paper-contrast", state.style.paperContrast / 100);
     els.paperFrame.style.setProperty("--paper-saturation", state.style.paperSaturation / 100);
@@ -505,25 +572,104 @@
     els.paperFrame.style.setProperty("--letter-line-height", state.style.lineHeight);
     els.paperFrame.style.setProperty("--letter-spacing", `${state.style.letterSpacing}em`);
     els.paperFrame.style.setProperty("--letter-opacity", state.style.inkOpacity / 100);
+    els.paperFrame.style.setProperty("--grid-opacity", state.style.gridOpacity / 100);
+    els.paperFrame.style.setProperty("--grid-row", `${row}px`);
+    els.paperFrame.style.setProperty("--grid-col", `${col}px`);
 
+    els.paperFrame.dataset.writingMode = state.writingMode;
     els.paperImage.src = asset.previewPath;
     els.paperImage.alt = `${asset.category} ${asset.title}`;
+    els.paperImage.onload = requestFitPaper;
     els.assetMeta.textContent = `${t("paperMeta")} ${asset.category} / ${asset.title}`;
 
-    els.previewTitle.textContent = state.style.showTitle ? state.title : "";
-    els.previewTitle.style.display = state.style.showTitle && state.title.trim() ? "" : "none";
+    syncEditableFields();
 
-    els.previewBody.textContent = emptyBody ? t("emptyPreview") : state.body;
-    els.previewBody.classList.toggle("preview-empty", emptyBody);
-
-    els.previewSignature.textContent = state.style.showSignature ? state.signature : "";
-    els.previewSignature.style.display = state.style.showSignature && state.signature.trim() ? "" : "none";
-
-    const sealText = String(state.style.sealText || "").trim().slice(0, 4);
-    els.sealMark.textContent = sealText || "雅";
+    els.editTitle.style.display = state.style.showTitle ? "" : "none";
+    els.editSignature.style.display = state.style.showSignature ? "" : "none";
+    els.sealMark.textContent = String(state.style.sealText || "雅").trim().slice(0, 4) || "雅";
     els.sealMark.style.display = state.style.showSeal ? "grid" : "none";
 
     updateControlReadouts();
+    requestFitPaper();
+  }
+
+  function requestFitPaper() {
+    window.cancelAnimationFrame(fitFrame);
+    fitFrame = window.requestAnimationFrame(fitPaperToContent);
+  }
+
+  function fitPaperToContent() {
+    if (!els.paperFrame || !els.letterZone) return;
+
+    const asset = selectedAsset();
+    if (!asset) return;
+
+    const width = els.paperFrame.getBoundingClientRect().width;
+    const baseHeight = width * asset.height / asset.width;
+    let height = baseHeight;
+    els.paperFrame.style.minHeight = `${height}px`;
+
+    for (let i = 0; i < 18; i++) {
+      const zoneRect = els.letterZone.getBoundingClientRect();
+      const frameRect = els.paperFrame.getBoundingClientRect();
+      const allowedOverflow = state.writingMode === "vertical"
+        ? Math.max(32, zoneRect.left - frameRect.left - 12)
+        : 2;
+      const overflow = state.writingMode === "vertical"
+        ? els.letterZone.scrollWidth - els.letterZone.clientWidth
+        : els.letterZone.scrollHeight - els.letterZone.clientHeight;
+
+      if (overflow <= allowedOverflow) break;
+      height += Math.min(520, Math.max(120, overflow * 1.45));
+      els.paperFrame.style.minHeight = `${height}px`;
+    }
+  }
+
+  function syncEditableFields(singleField) {
+    const map = {
+      title: els.editTitle,
+      body: els.editBody,
+      signature: els.editSignature
+    };
+
+    Object.keys(map).forEach((field) => {
+      if (singleField && field !== singleField) return;
+      const node = map[field];
+      if (!node || document.activeElement === node) return;
+      node.textContent = state[field] || "";
+    });
+  }
+
+  function syncTextControls(singleField) {
+    const map = {
+      title: "letterTitle",
+      body: "letterBody",
+      signature: "letterSignature"
+    };
+
+    Object.keys(map).forEach((field) => {
+      if (singleField && field !== singleField) return;
+      const node = document.getElementById(map[field]);
+      if (!node || document.activeElement === node) return;
+      node.value = state[field] || "";
+    });
+  }
+
+  function enterImmersive() {
+    state.mode = "immersive";
+    document.body.classList.add("is-immersive");
+    updatePaper();
+    window.requestAnimationFrame(() => {
+      if (els.editBody) {
+        els.editBody.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  function exitImmersive() {
+    state.mode = "setup";
+    document.body.classList.remove("is-immersive");
+    updatePaper();
   }
 
   function updateControlReadouts() {
@@ -531,7 +677,9 @@
       const key = output.dataset.output;
       const suffix = output.dataset.suffix || "";
       const rawValue = state.style[key];
-      const value = Number.isInteger(rawValue) ? rawValue : Number(rawValue).toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+      const value = Number.isInteger(rawValue)
+        ? rawValue
+        : Number(rawValue).toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
       output.textContent = `${value}${suffix}`;
     });
 
@@ -570,7 +718,7 @@
 
   function loadState() {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       return stored ? JSON.parse(stored) : {};
     } catch (error) {
       return {};
@@ -579,7 +727,8 @@
 
   function saveState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const { mode, ...stored } = state;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     } catch (error) {
       // Local storage can be unavailable in strict privacy contexts.
     }
@@ -589,6 +738,7 @@
     const merged = {
       ...DEFAULT_STATE,
       ...raw,
+      mode: "setup",
       style: {
         ...DEFAULT_STYLE,
         ...(raw && raw.style ? raw.style : {})
@@ -596,11 +746,18 @@
     };
 
     if (!I18N[merged.language]) merged.language = "zh-Hant";
+    if (merged.writingMode !== "horizontal") merged.writingMode = "vertical";
     if (typeof merged.title !== "string") merged.title = "";
     if (typeof merged.body !== "string") merged.body = "";
     if (typeof merged.signature !== "string") merged.signature = "";
     if (typeof merged.category !== "string") merged.category = "all";
     return merged;
+  }
+
+  function normalizeEditableText(text, field) {
+    const normalized = String(text || "").replace(/\u00a0/g, " ").replace(/\r\n/g, "\n");
+    if (field === "body") return normalized.replace(/\n{4,}/g, "\n\n\n");
+    return normalized.replace(/\n+/g, " ").trim();
   }
 
   function t(key) {
