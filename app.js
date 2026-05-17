@@ -35,8 +35,8 @@
 
   const DEFAULT_STYLE = {
     fontFamily: "song",
-    fontSize: 22,
-    lineHeight: 1.72,
+    fontSize: 20,
+    lineHeight: 1.65,
     letterSpacing: 0.06,
     inkColor: "#3f3931",
     inkOpacity: 95,
@@ -44,7 +44,7 @@
     paperContrast: 100,
     paperSaturation: 96,
     maskOpacity: 12,
-    gridOpacity: 34,
+    gridOpacity: 38,
     showTitle: true,
     showSignature: true,
     showSeal: true,
@@ -557,10 +557,11 @@
     const font = FONT_OPTIONS.find((item) => item.value === state.style.fontFamily) || FONT_OPTIONS[0];
     const imageUrl = `url("${asset.previewPath.replace(/"/g, "%22")}")`;
     const row = Math.max(18, state.style.fontSize * state.style.lineHeight);
-    const col = Math.max(18, state.style.fontSize * (1 + state.style.letterSpacing * 2.2));
+    const col = Math.max(22, state.style.fontSize * state.style.lineHeight);
 
     document.body.classList.toggle("is-immersive", state.mode === "immersive");
     els.paperFrame.style.setProperty("--paper-ratio", `${asset.width} / ${asset.height}`);
+    els.paperFrame.style.setProperty("--paper-ratio-num", asset.width / asset.height);
     els.paperFrame.style.setProperty("--paper-url", imageUrl);
     els.paperFrame.style.setProperty("--paper-brightness", state.style.paperBrightness / 100);
     els.paperFrame.style.setProperty("--paper-contrast", state.style.paperContrast / 100);
@@ -604,6 +605,7 @@
     const asset = selectedAsset();
     if (!asset) return;
 
+    els.paperFrame.style.minHeight = "";
     const width = els.paperFrame.getBoundingClientRect().width;
     const baseHeight = width * asset.height / asset.width;
     let height = baseHeight;

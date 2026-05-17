@@ -1,5 +1,13 @@
 # Change Log
 
+## V2.1 - 2026-05-17
+
+- Reworked vertical stationery guides into a traditional letter-paper frame: one outer writing-area border with vertical column separators.
+- Kept horizontal writing close to the V1/x.html style with soft horizontal guide lines.
+- Resized immersive mode so normal vertical and horizontal letters fit in one viewport without scrolling.
+- Warmed the immersive background and strengthened the floating paper shadow to better match the x.html atmosphere.
+- Preserved long-text behavior: the page extends only when the letter content is too long.
+
 ## V2 - 2026-05-17
 
 - Kept the workbench as the only active layout and removed the failed immersive/classic alternatives.

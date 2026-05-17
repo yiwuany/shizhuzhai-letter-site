@@ -26,8 +26,9 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    linear-gradient(90deg, rgba(47, 102, 88, .05), transparent 28%, rgba(164, 61, 45, .035)),
-    linear-gradient(180deg, #f6f0e5, #ebe0d0);
+    radial-gradient(900px 520px at 18% -10%, rgba(255, 252, 244, .9), transparent 64%),
+    radial-gradient(680px 420px at 92% 8%, rgba(47, 102, 88, .08), transparent 68%),
+    linear-gradient(180deg, #f6f0e5, #e9ddcc);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -281,7 +282,7 @@ button {
 .paper-frame {
   position: relative;
   width: min(100%, 580px);
-  min-height: calc(min(100vw, 580px) / var(--paper-ratio, .66));
+  min-height: calc(min(100vw, 580px) / var(--paper-ratio-num, .66));
   overflow: visible;
   background-color: #f7efe1;
   border: 1px solid rgba(92, 73, 50, .18);
@@ -356,18 +357,22 @@ button {
   z-index: 0;
   opacity: var(--grid-opacity, .34);
   pointer-events: none;
+  border: 1px solid rgba(128, 74, 48, .58);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 250, 240, .34),
+    inset 0 0 0 4px rgba(128, 74, 48, .035);
 }
 
 .paper-frame[data-writing-mode="vertical"] .paper-grid {
   background-image:
-    repeating-linear-gradient(to left, rgba(115, 78, 45, .52) 0 1px, transparent 1px var(--grid-col)),
-    repeating-linear-gradient(to bottom, rgba(115, 78, 45, .22) 0 1px, transparent 1px var(--grid-row));
+    repeating-linear-gradient(to left, rgba(128, 74, 48, .6) 0 1px, transparent 1px var(--grid-col));
 }
 
 .paper-frame[data-writing-mode="horizontal"] .paper-grid {
+  border-color: rgba(128, 74, 48, .18);
+  box-shadow: none;
   background-image:
-    repeating-linear-gradient(to bottom, rgba(115, 78, 45, .52) 0 1px, transparent 1px var(--grid-row)),
-    repeating-linear-gradient(to right, rgba(115, 78, 45, .22) 0 1px, transparent 1px var(--grid-col));
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--grid-row) - 1px), rgba(128, 74, 48, .38) calc(var(--grid-row) - 1px) var(--grid-row));
 }
 
 .paper-editor {
@@ -582,7 +587,10 @@ button {
 }
 
 body.is-immersive {
-  background: #17130f;
+  background:
+    radial-gradient(920px 520px at 50% -8%, rgba(255, 252, 244, .28), transparent 68%),
+    radial-gradient(900px 560px at 18% 10%, rgba(165, 122, 74, .16), transparent 72%),
+    linear-gradient(180deg, #f1e7d8, #d8c5ad);
 }
 
 body.is-immersive .app-shell {
@@ -608,22 +616,23 @@ body.is-immersive .preview-shell {
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(700px 360px at 50% 0, rgba(255, 245, 224, .1), transparent 72%),
-    #17130f;
+    radial-gradient(900px 500px at 52% 4%, rgba(255, 252, 244, .46), transparent 72%),
+    linear-gradient(180deg, rgba(255, 250, 241, .32), rgba(222, 203, 176, .28));
   box-shadow: none;
-  padding: clamp(18px, 3vw, 42px);
+  padding: clamp(14px, 2.3vw, 28px);
   display: block;
 }
 
 body.is-immersive .paper-stage {
-  min-height: calc(100vh - 84px);
-  place-items: start center;
+  min-height: calc(100vh - 48px);
+  place-items: center;
   padding: 0;
 }
 
 body.is-immersive .paper-frame {
-  width: min(94vw, 760px);
+  width: min(92vw, calc((100vh - 56px) * var(--paper-ratio-num, .66)), 620px);
   margin: 0 auto;
+  box-shadow: 0 30px 72px rgba(86, 58, 32, .24), 0 6px 22px rgba(86, 58, 32, .16);
 }
 
 body.is-immersive .immersive-exit {
