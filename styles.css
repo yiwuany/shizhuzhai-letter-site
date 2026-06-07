@@ -48,6 +48,8 @@ button {
 .app-shell {
   min-height: 100vh;
   padding: 18px;
+  display: flex;
+  flex-direction: column;
 }
 
 .topbar {
@@ -140,11 +142,33 @@ button {
 
 .workspace {
   display: grid;
+  width: 100%;
   max-width: 1500px;
   margin: 0 auto;
   gap: 16px;
   grid-template-columns: minmax(230px, 292px) minmax(390px, 1fr) minmax(318px, 372px);
   grid-template-areas: "library preview editor";
+}
+
+.site-footer {
+  width: 100%;
+  max-width: 1500px;
+  margin: 14px auto 0;
+  padding: 10px 14px 2px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.site-footer a {
+  color: var(--accent-ink);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(47, 102, 88, .28);
+}
+
+.site-footer a:hover,
+.site-footer a:focus {
+  border-bottom-color: rgba(47, 102, 88, .72);
 }
 
 .library-panel {
@@ -782,7 +806,8 @@ body.is-immersive .topbar,
 body.is-immersive .library-panel,
 body.is-immersive .editor-panel,
 body.is-immersive .preview-head,
-body.is-immersive .immersive-hint {
+body.is-immersive .immersive-hint,
+body.is-immersive .site-footer {
   display: none;
 }
 

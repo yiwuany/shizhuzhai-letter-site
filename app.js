@@ -1041,12 +1041,6 @@
         <label class="field-label" for="letterSignature">${t("signatureLabel")}</label>
         <textarea class="textarea compact" id="letterSignature" data-field="signature" placeholder="${escapeAttr(t("signaturePlaceholder"))}">${escapeHtml(state.signature)}</textarea>
       </div>
-      <div class="button-row">
-        <button class="btn primary" type="button" data-action="enter-immersive">${t("enterImmersive")}</button>
-        <button class="btn" type="button" data-action="preview-image">${t("previewImage")}</button>
-        <button class="btn" type="button" data-action="export-image">${t("exportImage")}</button>
-        <button class="btn danger" type="button" data-action="reset-content">${t("resetContent")}</button>
-      </div>
       <div class="section-divider"></div>
       <div class="panel-head">
         <h2 class="panel-title">${t("style")}</h2>
