@@ -1,21 +1,31 @@
 # Handoff: Shizhuzhai Letter Site
 
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 ## Latest Checkpoint For Next Chat
 
-The latest dirty-tree implementation is the `centered-spread` update on top of `paper-axis`. Start the next conversation by reading this section and then continue from the current uncommitted files.
+V2 final is committed as `4c8f3c1` and tagged `v2.2.0`.
+
+The latest dirty-tree implementation is the first V3 checkpoint: image preview/export plus a generated Zhu/Bai carved-seal renderer with real seal-glyph lookup. Start the next conversation by reading this section and then continue from the current uncommitted files.
 
 Current dirty files:
 
+- `CHANGELOG.md`
 - `HANDOFF.md`
 - `app.js`
 - `index.html`
 - `styles.css`
+- `assets/seal-glyphs/雅.svg`
+- `assets/seal-glyphs/楚.svg`
+- `assets/fonts/ebas927.ttf`
+- `assets/fonts/README.md`
+- `assets/vendor/opentype.min.js`
+- `assets/vendor/README.md`
 
 Current local state:
 
 - Main dev server is running at `http://127.0.0.1:43194/index.html`.
+- Clean-origin verification server is also running at `http://127.0.0.1:43195/index.html`.
 - Temporary seeded-test server on port `43196` is stopped.
 - No `.tmp-seed-server.py` file should remain.
 - `node --check app.js` passes.
@@ -23,20 +33,39 @@ Current local state:
 
 Most recent behavior verified:
 
-- Vertical immersive mode now uses centered spread alignment for expanded text.
-- Short vertical immersive paper is centered horizontally and vertically.
-- Long vertical immersive paper scrolls to the horizontal center of the spread (`scrollRatio` measured `0.5`), so the paper expands visually to both sides instead of anchoring to the far right.
-- Long vertical immersive background uses centered `repeat-x` tiling (`background-position: 50% 0%`) so the letter-paper image reads as a horizontal spread.
-- Setup/workbench vertical long text still keeps the right/original page visible first (`scrollRatio` measured `1`) and does not overlap the right editor panel.
-- Vertical long text no longer expands into or overlaps the right-side tool/settings panel.
-- Workbench vertical long text uses `.paper-stage` as a horizontal scroll viewport and scrolls to the right edge so the original/rightmost page is visible first.
-- Immersive vertical long text stays vertically centered and uses horizontal scrolling from the center of the expanded spread.
-- Horizontal mode uses a wider display ratio, measured around `0.78` versus vertical around `0.635`.
-- Grid distribution and text line-height remain tied to actual grid cell size.
+- V3 adds `成圖預覽` and `導出圖片` buttons in both the preview header and editor action row.
+- Image preview uses a Canvas renderer and opens a modal with a blob PNG plus a download link.
+- Preview generation was verified in browser: modal opened, preview image was a blob, and generated PNGs measured `4518 × 1562` for long vertical test content, `1022 × 1610` for short content after the first seal update, and `992 × 1562` after the real glyph-composite update.
+- Direct export uses the same Canvas renderer and then programmatically clicks a download link. Codex in-app browser does not support download events, so the final native download prompt could not be verified there.
+- Seal rendering is now an SVG-generated seal face, not normal text in a box.
+- Seal text is now treated as inscription text before rendering: punctuation/spacing is removed and common simplified characters are normalized. The `印文格式` selector controls whether the user gets literal text, `印`, `之印`, or the earlier smart suffix behavior.
+- Seal glyphs now try to load real per-character `*-seal.svg` art from Wikimedia Commons at runtime through the Commons API, with an 8-second timeout. This means supported characters render as actual 篆刻-style vector glyphs, not CSS text.
+- Glyph source priority is now `assets/fonts/ebas927.ttf` first, then curated local SVG fallback, then manual composites, then remote Commons lookup. `assets/vendor/opentype.min.js` converts font outlines into normalized, bolder `300 × 300` SVG paths at runtime, and sanitized SVG glyphs are measured with `getBBox()` before being normalized into the same `300 × 300` glyph box.
+- Browser verification after this normalization change showed `楚` in literal, `印`, `之印`, and smart formats using only `viewBox 0 0 300 300` glyphs, with no `<text>` fallback and no missing glyphs.
+- Latest seal rewrite changes priority to font first, local SVG fallback second, composite third, remote fourth. Current local overrides for `楚` and `雅` are preserved on disk but no longer win over the font unless a source is explicitly marked `preferLocal`.
+- Seal layout now uses rectangular optical fill cells instead of square `size` slots. Glyphs render with `preserveAspectRatio="none"` so each cell is evenly filled, and Canvas export uses the same `glyphWidth` / `glyphHeight` values.
+- Rendered seals expose `data-seal-sources` such as `李:font, 白:font, 之:font, 印:font`; the editor shows `未找到小篆：...` when all glyph sources fail.
+- Local full-character glyph assets are checked only after the font unless a future source is marked `preferLocal`. Current local fallback assets: `雅` and `楚` in `assets/seal-glyphs/`.
+- Missing whole-character glyphs can be composed from real seal components for specific cases. Current manual composites: `雅 = 牙 + 隹`, `雷 = 雨 + 田`.
+- Earlier local-override verification showed `雅` loading from SVG; this is now superseded by the font-first source priority for visual consistency.
+- Browser verification after the seal-rules rewrite showed default `李白` staying literal, `加之印` rendering as `李白之印`, square `viewBox 0 0 108 108`, 4 glyph SVGs, 0 `<text>` fallbacks, and 0 missing-glyph marks in both Zhu and Bai styles. Generated PNG preview also loaded as a blob image (`992 × 1562` in the final check).
+- Browser verification after the optical-fill rewrite showed `楚`, `雅`, `楚印`, `雅之印`, and `李白之印` all resolving to `font` sources with `viewBox 0 0 300 300`, no `<text>` fallback, and no missing glyphs. A missing-character check with `𠮷` produced `𠮷:missing` and the visible warning `未找到小篆：𠮷`.
+- HTTP verification passed for both local glyph files: `/assets/seal-glyphs/雅.svg` and `/assets/seal-glyphs/楚.svg` return `200`.
+- Seal layout now follows traditional reading order: characters go top-to-bottom within a column, and columns go right-to-left. Four-character verification with `山雷雅書` produced positions right-top, right-bottom, left-top, left-bottom.
+- Seal frame shape now varies by character count: 1字 tall, 2字 vertical, 3字 high-square, 4字 square, 5-6字 tall-grid, 7-9字 large-grid.
+- Visible regular-font fallback has been removed from both DOM SVG and Canvas export. Missing glyphs render as subtle carved missing-glyph marks, not Kai/Song text.
+- Editor now has an `印章樣式` / `印章样式` selector with `朱文` and `白文`.
+- Zhu style was verified as a tall single-character SVG seal (`viewBox 0 0 82 132`, red broken border and red stroke glyph).
+- Bai style was verified as a square SVG seal (`viewBox 0 0 96 96`, red field, pale carved glyph, wear marks).
+- Important limitation: the built-in Shuowen Jiezi font covers 6721 glyphs, which is much broader and consistent, but not every possible Unicode character. Unsupported characters still need SVG overrides or component composites.
+- Canvas export now draws the stationery image tiling, paper wash, grid, text, and carved seal.
+- `requestAnimationFrame` in export preview has a timeout fallback because background browser tabs can throttle rAF.
+- `node --check app.js` passes.
+- Browser health check found no console errors after the V3 changes.
 
 Recommended next step:
 
-- Do a human visual pass at `http://127.0.0.1:43194/index.html`, especially vertical long text in immersive mode after the centered-spread change and horizontal mode proportions. If acceptable, update `CHANGELOG.md` and commit this version.
+- Do a human visual pass at `http://127.0.0.1:43194/index.html`, especially the generated PNG preview and the carved seal shape. If acceptable, commit this V3 checkpoint.
 
 ## Uncommitted In-Progress Update: Grid, Flow, Paper Axis
 

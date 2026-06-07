@@ -1,0 +1,13 @@
+output/
+test-results/
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+*.log
+*.tmp
+*.temp
+
+.vscode/
+.idea/

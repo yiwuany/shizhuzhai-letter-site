@@ -467,19 +467,83 @@ button {
   left: 8%;
   bottom: 12%;
   z-index: 3;
-  min-width: 34px;
-  min-height: 46px;
-  padding: 5px 4px;
-  border: 2px solid rgba(164, 61, 45, .86);
-  color: rgba(164, 61, 45, .9);
-  font-family: "Kaiti SC", "KaiTi", "STKaiti", serif;
-  font-size: 18px;
-  line-height: 1.05;
-  writing-mode: vertical-rl;
-  text-align: center;
-  display: grid;
-  place-items: center;
-  opacity: .86;
+  width: 72px;
+  height: 72px;
+  border: 0;
+  background: transparent;
+  color: var(--seal);
+  display: block;
+  opacity: .94;
+  transform: rotate(-1.5deg);
+  filter: drop-shadow(0 1px 1px rgba(84, 35, 24, .12));
+}
+
+.seal-mark[data-seal-shape="tall"] {
+  width: 54px;
+  height: 82px;
+}
+
+.seal-mark[data-seal-shape="vertical"] {
+  width: 58px;
+  height: 88px;
+}
+
+.seal-mark[data-seal-shape="high-square"] {
+  width: 72px;
+  height: 80px;
+}
+
+.seal-mark[data-seal-shape="tall-grid"] {
+  width: 70px;
+  height: 94px;
+}
+
+.seal-mark[data-seal-shape="large-grid"] {
+  width: 84px;
+  height: 84px;
+}
+
+.seal-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.seal-glyph-art {
+  overflow: visible;
+}
+
+.seal-glyph-art-zhu {
+  color: rgba(217, 102, 80, .9);
+}
+
+.seal-glyph-art-bai {
+  color: rgba(255, 250, 240, .96);
+}
+
+.seal-bai-rim {
+  fill: none;
+  stroke: rgba(143, 45, 34, .55);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.seal-warning {
+  margin: -4px 0 0;
+  color: #9f3f2f;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.seal-warning[hidden] {
+  display: none;
+}
+
+button:disabled,
+.btn.is-disabled {
+  cursor: wait;
+  opacity: .58;
 }
 
 .field-group,
@@ -525,6 +589,87 @@ button {
 
 .textarea.compact {
   min-height: 72px;
+}
+
+.export-modal[hidden] {
+  display: none;
+}
+
+.export-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.export-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(42, 31, 20, .48);
+  backdrop-filter: blur(8px);
+}
+
+.export-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(1080px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(92, 73, 50, .2);
+  border-radius: var(--radius);
+  background: rgba(255, 252, 244, .96);
+  box-shadow: 0 26px 70px rgba(48, 34, 18, .24);
+}
+
+.export-dialog-head,
+.export-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.export-dialog-head h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.export-preview-box {
+  min-height: 260px;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  border: 1px solid rgba(92, 73, 50, .14);
+  border-radius: 6px;
+  background:
+    linear-gradient(45deg, rgba(92, 73, 50, .055) 25%, transparent 25% 75%, rgba(92, 73, 50, .055) 75%),
+    linear-gradient(45deg, rgba(92, 73, 50, .055) 25%, transparent 25% 75%, rgba(92, 73, 50, .055) 75%);
+  background-position: 0 0, 10px 10px;
+  background-size: 20px 20px;
+}
+
+.export-preview-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #f7efe1;
+  box-shadow: 0 16px 42px rgba(50, 37, 22, .18);
+}
+
+.export-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .input:focus,

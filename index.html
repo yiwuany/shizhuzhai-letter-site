@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>十竹齋箋譜寫信</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css?v=20260517-centered-spread">
+  <link rel="stylesheet" href="styles.css?v=20260522-v6-seal-optical">
 </head>
 <body class="layout-workbench" data-layout="workbench">
   <div class="app-shell" data-app>
@@ -17,7 +17,15 @@
     </main>
     <button class="immersive-exit" type="button" data-action="exit-immersive" aria-label="返回設定">Esc</button>
   </div>
+  <script src="assets/vendor/opentype.min.js"></script>
   <script src="assets-manifest.js"></script>
-  <script src="app.js?v=20260517-centered-spread"></script>
+  <script>
+    if (window.location.protocol === "file:" || new URLSearchParams(window.location.search).has("inline-previews")) {
+      document.write('<script src="assets-inline-previews.js"><\/script>');
+    }
+  </script>
+  <script src="assets/seal-glyphs/generated-manifest.js"></script>
+  <script src="assets/fonts/seal-font-data.js"></script>
+  <script src="app.js?v=20260607-file-export"></script>
 </body>
 </html>

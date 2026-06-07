@@ -22,6 +22,7 @@ if (-not $SourceRoot) {
 $thumbRoot = Join-Path $SiteRoot 'assets\thumbs'
 $previewRoot = Join-Path $SiteRoot 'assets\previews'
 $manifestPath = Join-Path $SiteRoot 'assets-manifest.js'
+$inlinePreviewPath = Join-Path $SiteRoot 'assets-inline-previews.js'
 
 New-Item -ItemType Directory -Force -Path $thumbRoot, $previewRoot | Out-Null
 
@@ -129,4 +130,16 @@ $json = $assets | ConvertTo-Json -Depth 5
 $manifest = "window.SHIZHUZHAI_ASSETS = $json;`r`n"
 Set-Content -LiteralPath $manifestPath -Value $manifest -Encoding UTF8
 
+$inlinePreviews = [ordered]@{}
+foreach ($asset in $assets) {
+  $previewFullPath = Join-Path $SiteRoot ($asset.previewPath -replace '/', '\')
+  $bytes = [System.IO.File]::ReadAllBytes($previewFullPath)
+  $inlinePreviews[$asset.id] = 'data:image/jpeg;base64,' + [Convert]::ToBase64String($bytes)
+}
+
+$inlineJson = $inlinePreviews | ConvertTo-Json -Compress -Depth 3
+$inlinePreviewManifest = "window.SHIZHUZHAI_INLINE_PREVIEWS = $inlineJson;`r`n"
+Set-Content -LiteralPath $inlinePreviewPath -Value $inlinePreviewManifest -Encoding UTF8
+
 Write-Host ("Generated {0} assets into {1}" -f $assets.Count, $SiteRoot)
+Write-Host ("Generated inline previews into {0}" -f $inlinePreviewPath)
