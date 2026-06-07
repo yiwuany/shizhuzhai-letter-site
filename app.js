@@ -944,6 +944,19 @@
         `).join("")}
       </div>
     `;
+    window.requestAnimationFrame(scrollSelectedAssetIntoView);
+  }
+
+  function scrollSelectedAssetIntoView() {
+    const grid = els.library && els.library.querySelector(".asset-grid");
+    const active = grid && grid.querySelector(".asset-card.is-active");
+    if (!grid || !active || grid.scrollWidth <= grid.clientWidth) return;
+
+    const targetLeft = active.offsetLeft - (grid.clientWidth - active.offsetWidth) / 2;
+    grid.scrollTo({
+      left: Math.max(0, targetLeft),
+      behavior: "smooth"
+    });
   }
 
   function renderPreviewShell() {
@@ -963,7 +976,6 @@
             <button class="btn" type="button" data-action="random-category">${t("randomCategory")}</button>
             <button class="btn" type="button" data-action="preview-image">${t("previewImage")}</button>
             <button class="btn" type="button" data-action="export-image">${t("exportImage")}</button>
-            <button class="btn primary" type="button" data-action="enter-immersive">${t("enterImmersive")}</button>
           </div>
         </div>
         <div class="paper-stage">
